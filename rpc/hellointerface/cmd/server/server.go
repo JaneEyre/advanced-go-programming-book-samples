@@ -15,12 +15,17 @@ func main() {
 	if err != nil {
 		log.Fatal("ListenTCP error:", err)
 	}
+	log.Println("Server listening on port 1234")
 
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			log.Fatal("Accept error:", err)
+			continue
 		}
+		// *** ADD THIS LINE ***
+		// Log the address of the client that just connected.
+		log.Printf("Accepted connection from: %s", conn.RemoteAddr().String())
 
 		go rpc.ServeConn(conn)
 	}

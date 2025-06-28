@@ -1,0 +1,26 @@
+
+// Use the proto3 syntax.
+syntax = "proto3";
+
+// Define the package name. This helps prevent naming conflicts.
+package hello;
+
+// Specify the Go package path where the generated code will live.
+option go_package = "example.com/grpc-hello/hello";
+
+// The Greeter service definition.
+service Greeter {
+  // Defines a remote procedure call (RPC) named SayHello.
+  // It takes a HelloRequest message and returns a HelloReply message.
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+}
+
+// The response message containing the greeting.
+message HelloReply {
+  string message = 1;
+}
