@@ -1,0 +1,51 @@
+Feature	Raw TCP Server (rpc.ServeCodec)
+Protocol	Raw TCP
+Connection	Persistent, long-lived TCP connection.
+Flexibility	Less flexible. You are responsible for everything.
+Security	You must implement TLS/SSL manually.
+Tooling	Requires custom clients or tools like nc.
+Overhead	Lower Overhead. Minimal framing data; just the JSON payload.
+Use Case	Internal Services. Ideal for high-performance, low-latency services within a trusted network where efficiency is paramount.
+Code Example	go<br>for {<br> conn, _ := listener.Accept()<br> go rpc.ServeCodec(...)<br>}
+
+Feature	HTTP Server (http.HandleFunc)
+Protocol	HTTP/1.1 (or HTTP/2)
+Connection	One HTTP request/response per RPC call.
+Flexibility	Highly Flexible. Can be placed behind reverse proxies, load balancers, and API gateways.
+Security	Easier Security. Can use standard http.ListenAndServeTLS for HTTPS. Offloading TLS to a proxy is trivial.
+Tooling	Excellent Tooling. Can be tested with curl, Postman, web browsers, and standard HTTP libraries in any language.
+Overhead	Higher Overhead. Each call includes HTTP headers, which adds a small amount of data.
+Use Case	Public or Web-Facing APIs. The standard for services that need to be accessible from a variety of clients, especially web browsers.
+Code Example	go<br>http.HandleFunc("/", ...)<br>http.ListenAndServe(...)
+
+
+Deeper Dive into the Key Differences
+1. Protocol and Connection Handling
+Raw TCP Server:
+
+How it works: It opens a raw TCP socket and waits for connections. Each connection is a continuous stream of data. The rpc.ServeCodec function takes over this stream and handles reading/writing multiple JSON-RPC requests and responses over that single, long-lived connection until it's closed.
+Analogy: It's like having a dedicated, private phone line directly to the service.
+HTTP Server:
+
+How it works: It uses the well-defined HTTP protocol. A client connects, sends an HTTP POST request (with headers and a body containing the JSON-RPC payload), and the server processes it and sends back an HTTP response (with status codes, headers, and a body). The connection is typically closed after the response (though HTTP Keep-Alives can reuse it).
+Analogy: It's like sending a formal letter (an HTTP request) through the postal service. The service receives the letter, writes a reply, and sends it back. Each RPC call is a separate letter.
+2. Flexibility and Ecosystem (The Biggest Advantage of HTTP)
+This is where the HTTP server truly shines. By building on HTTP, you instantly gain access to the entire web ecosystem:
+
+Reverse Proxies & Load Balancers: You can easily put your service behind Nginx, HAProxy, or a cloud load balancer to handle scaling, SSL termination, and routing.
+Authentication & Middleware: You can use standard HTTP middleware for logging, rate-limiting, authentication (e.g., checking for a Bearer token in the Authorization header), and more. With the raw TCP server, you would have to invent your own solutions for all of this.
+Browser Compatibility: A JavaScript client running in a web browser can only make HTTP requests (via fetch or XMLHttpRequest). It cannot open raw TCP sockets. This makes the HTTP server the only option for RPC services that need to be called directly from a web front end.
+3. Performance and Overhead
+Raw TCP Server: This version is more performant for high-throughput scenarios. There are no HTTP headers to parse or create for each call, leading to less data on the wire and less processing per request.
+HTTP Server: The overhead of HTTP headers is usually negligible for most applications, but in systems that process tens of thousands of requests per second, it can become a factor.
+Conclusion: Which One Should You Use?
+Use the Raw TCP Server (rpc.ServeCodec) when:
+
+You are building an internal backend service in a controlled environment.
+Maximum performance and low latency are the absolute top priorities.
+You know all clients will be custom-built to speak this specific TCP protocol.
+Use the HTTP Server (http.HandleFunc) when: (This is the choice for 95% of modern applications)
+
+The service needs to be accessible to a variety of clients (especially web browsers).
+You want to leverage standard web tooling, infrastructure, and security practices.
+Ease of development, flexibility, and interoperability are more important than shaving off microseconds of latency.

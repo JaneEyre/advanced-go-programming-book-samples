@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package netrpc;
+
+option go_package = "./;netrpc";
+
+// A request message
+message HelloRequest {
+  string name = 1;
+}
+
+// A response message
+message HelloResponse {
+  string message = 2;
+}
+
+// B response message
+message HelloBye {
+  int32 time = 5;
+}
+
+// This is the crucial part that was likely missing.
+// Because this service exists, file.Service will have a length of 1,
+// and your plugin's code will be executed.
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloResponse);
+}
+
+service Bye {
+  rpc SayBye (HelloRequest) returns (HelloBye);
+}
