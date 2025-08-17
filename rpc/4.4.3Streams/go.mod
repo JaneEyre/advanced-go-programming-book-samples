@@ -1,11 +1,10 @@
-module kafka-notify
+module stream
 
-go 1.24.2
+go 1.24.4
 
 require (
-	github.com/golang/protobuf v1.5.4
 	google.golang.org/grpc v1.74.2
-	google.golang.org/protobuf v1.36.6
+	google.golang.org/protobuf v1.36.7
 )
 
 require (

@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+// Defines the Go package path for the generated code.
+option go_package = "./stream";
+
+package hellostream;
+
+message String {
+	string value = 1;
+}
+
+service HelloService {
+	rpc Hello (String) returns (String);
+
+	rpc Channel (stream String) returns (stream String);
+}
